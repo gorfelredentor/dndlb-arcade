@@ -516,6 +516,12 @@ function renderNav(){
   const nav=$("#cats");
   nav.innerHTML = CATS.map(c=>`<a class="chip" href="#sec-${c.id}" data-c="${c.id}">${c.name} (${P.filter(p=>p.cat===c.id).length})</a>`).join("")
     + `<a class="chip" href="#sec-videos" data-c="videos">Videos (${VIDEOS.length})</a>`;
+  nav.addEventListener("click",e=>{
+    const a=e.target.closest(".chip"); if(!a) return;
+    const t=document.getElementById(a.getAttribute("href").slice(1)); if(!t) return;
+    e.preventDefault(); t.scrollIntoView({behavior:"smooth",block:"start"});
+    try{ history.replaceState(null,"",a.getAttribute("href")); }catch(_){}
+  });
 }
 function watchSections(){
   if(!("IntersectionObserver" in window)) return;
@@ -523,7 +529,7 @@ function watchSections(){
     es.forEach(e=>{ if(e.isIntersecting){
       const id=e.target.id.replace("sec-","");
       document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-current", c.dataset.c===id));
-      const a=document.querySelector(`.chip[data-c="${id}"]`); a && a.scrollIntoView({block:"nearest",inline:"center"});
+      const a=document.querySelector(`.chip[data-c="${id}"]`), box=$("#cats"); if(a&&box) box.scrollTo({left:box.scrollLeft+a.getBoundingClientRect().left-box.getBoundingClientRect().left-(box.clientWidth-a.offsetWidth)/2});
     }});
   },{rootMargin:"-45% 0px -50% 0px"});
   document.querySelectorAll("section[id^='sec-']").forEach(s=>io.observe(s));
